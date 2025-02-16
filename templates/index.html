@@ -4,35 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>資料表管理</title>
+    <link href="static/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-
-    <h2>使用者列表</h2>
+<body class="container py-4">
+    <h2 class="text-center">使用者列表</h2>
 
     <!-- 匯入資料 -->
-    <div>
-        <label for="csv-file">匯入 CSV 檔案:</label>
-        <input type="file" id="csv-file" accept=".csv">
-        <button onclick="importData()">匯入資料</button>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="file" id="csv-file" class="form-control" accept=".csv">
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-primary" onclick="importData()">匯入資料</button>
+        </div>
     </div>
 
-    <!-- 匯出按鈕和篩選框 -->
-    <div>
-        <input type="text" id="search-box" placeholder="搜尋 ID, Name, Email" onkeyup="fetchData()">
-        <button onclick="exportData()">匯出篩選後資料</button>
+    <!-- 匯出按鈕 和 刪除勾選的資料按鈕 -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button class="btn btn-success w-100" onclick="exportData()">匯出篩選後資料</button>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-danger w-100" onclick="batchDeleteSelected()">刪除選中的資料</button>
+        </div>
     </div>
 
-    <!-- 刪除勾選的資料 -->
-    <button onclick="batchDeleteSelected()">刪除選中的資料</button>
-
+    <!-- 新增資料表單 -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="new-name" class="form-control" placeholder="輸入 Name">
+        </div>
+        <div class="col-md-4">
+            <input type="email" id="new-email" class="form-control" placeholder="輸入 Email">
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-primary" onclick="addData()">新增</button>
+        </div>
+    </div>
+    
     <!-- 表格 -->
-    <table>
-        <thead>
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
             <tr>
-                <th><input type="checkbox" id="select-all" onclick="selectAllRows()"> 全選勾選框</th>
-                <th>id <input type="text" oninput="filterTable()" data-column="0" placeholder="篩選 ID"></th>
-                <th>name <input type="text" oninput="filterTable()" data-column="1" placeholder="篩選 Name"></th>
-                <th>email <input type="text" oninput="filterTable()" data-column="2" placeholder="篩選 Email"></th>
+                <th><input type="checkbox" id="select-all" onclick="selectAllRows()"> 全選</th>
+                <th>ID <input type="text" class="form-control filter-input" oninput="filterTable()" data-column="1" placeholder="篩選 ID"></th>
+                <th>Name <input type="text" class="form-control filter-input" oninput="filterTable()" data-column="2" placeholder="篩選 Name"></th>
+                <th>Email <input type="text" class="form-control filter-input" oninput="filterTable()" data-column="3" placeholder="篩選 Email"></th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -41,35 +58,7 @@
         </tbody>
     </table>
 
-    <!-- 新增資料表單 -->
-    <div>
-        <label for="new-id">ID:</label>
-        <input type="text" id="new-id" placeholder="無須輸入" disabled> <!-- 不可編輯的 ID 欄位 -->
-        <label for="new-name">Name:</label>
-        <input type="text" id="new-name" placeholder="輸入 Name">
-        <label for="new-email">Email:</label>
-        <input type="email" id="new-email" placeholder="輸入 Email">
-        <button onclick="addData()">新增</button>
-    </div>
-
-    <!-- 分頁控制 -->
-    <div class="pagination-controls">
-        <button id="prev-page" onclick="changePage(-1)">上一頁</button>
-        <span id="page-info">頁面資訊</span>
-        <button id="next-page" onclick="changePage(1)">下一頁</button>
-    </div>
-
-    <!-- 每頁數量選擇 -->
-    <div class="per-page-controls">
-        <label for="per-page-select">每頁顯示:</label>
-        <select id="per-page-select" onchange="fetchData()">
-            <option value="10">每頁 10 筆</option>
-            <option value="50">每頁 50 筆</option>
-            <option value="100">每頁 100 筆</option>
-            <option value="200">每頁 200 筆</option>
-        </select>
-    </div>
-
+    <script src="static/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -25,7 +25,6 @@ with app.app_context():
 # 取得資料
 @app.route("/get_data", methods=["GET"])
 def get_data():
-    search = request.args.get("search", "", type=str)  # 取得篩選關鍵字
     page = request.args.get("page", 1, type=int)  # 當前頁數
     per_page = request.args.get("per_page", 10, type=int)  # 每頁筆數
     sort_by = request.args.get("sort_by", "id", type=str)  # 取得排序欄位，預設 id
@@ -33,10 +32,6 @@ def get_data():
 
     # 建立查詢
     query = User.query
-    if search:
-        query = query.filter(
-            (User.name.contains(search)) | (User.email.contains(search)) | (User.id == search)
-        )
 
     # 依據前端傳來的欄位進行排序
     if sort_by == "id":
@@ -147,17 +142,24 @@ def import_data():
 # 匯出資料
 @app.route("/export_data", methods=["GET"])
 def export_data():
-    search = request.args.get("search", "", type=str)  # 篩選條件
-    sort_by = request.args.get("sort_by", "id", type=str)  # 排序欄位
-    order = request.args.get("order", "asc", type=str)  # 排序順序
-    per_page = request.args.get("per_page", 10, type=int)  # 每頁筆數
-    page = request.args.get("page", 1, type=int)  # 當前頁數
+    # 從請求中獲取篩選條件
+    filter_id = request.args.get("filter_id", "", type=str)  # 篩選 ID
+    filter_name = request.args.get("filter_name", "", type=str)  # 篩選名稱
+    filter_email = request.args.get("filter_email", "", type=str)  # 篩選 Email
 
+    # 獲取排序條件
+    sort_by = request.args.get("sort_by", "id", type=str)  # 排序依據欄位
+    order = request.args.get("order", "asc", type=str)  # 排序順序
+
+    # 根據篩選條件建立查詢
     query = User.query
-    if search:
-        query = query.filter(
-            (User.name.contains(search)) | (User.email.contains(search)) | (User.id == search)
-        )
+
+    if filter_id:
+        query = query.filter(User.id.ilike(f"%{filter_id}%"))
+    if filter_name:
+        query = query.filter(User.name.ilike(f"%{filter_name}%"))
+    if filter_email:
+        query = query.filter(User.email.ilike(f"%{filter_email}%"))
 
     # 根據排序條件排序
     if sort_by == "id":
@@ -167,17 +169,19 @@ def export_data():
     elif sort_by == "email":
         query = query.order_by(User.email.asc() if order == "asc" else User.email.desc())
 
-    # 取得篩選後的資料
-    users = query.paginate(page=page, per_page=per_page, error_out=False)
+    # 查詢所有符合條件的資料（不進行分頁）
+    users = query.all()
 
-    # 將資料轉換成 CSV，不包含 id
+    # 轉換為 CSV 格式
     output = StringIO()
     writer = csv.writer(output)
     writer.writerow(["name", "email"])  # CSV 標題
-    for user in users.items:
+
+    # 將資料寫入 CSV
+    for user in users:
         writer.writerow([user.name, user.email])
 
-    # 讓使用者下載 CSV
+    # 回傳 CSV 檔案
     output.seek(0)
     return Response(output.getvalue(), mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=export_data.csv"})
 
